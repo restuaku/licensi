@@ -17,11 +17,9 @@ RUN mkdir -p /var/www/html/data && \
 # Set working directory
 WORKDIR /var/www/html
 
-# Expose port (Railway uses PORT env var)
 EXPOSE 80
 
-# Use Railway's PORT env var
-RUN sed -i 's/Listen 80/Listen ${PORT}/g' /etc/apache2/ports.conf && \
-    sed -i 's/:80/:${PORT}/g' /etc/apache2/sites-available/000-default.conf
-
-CMD ["apache2-foreground"]
+# Startup script: replace port at runtime then start Apache
+CMD sed -i "s/Listen 80/Listen ${PORT:-80}/g" /etc/apache2/ports.conf && \
+    sed -i "s/:80/:${PORT:-80}/g" /etc/apache2/sites-available/000-default.conf && \
+    apache2-foreground
